@@ -13,13 +13,29 @@ def context() -> Generator[AlgopyTestContext, None, None]:
         ctx.reset()
 
 
-def test_hello(context: AlgopyTestContext) -> None:
+def test_apply_for_nft(context: AlgopyTestContext) -> None:
     # Arrange
-    dummy_input = context.any_string()
+    name = context.any_string()
+    counter = 0
     contract = MutableSmartNft()
 
+    # contract.create_application("Ayushman", 0, [1059])
     # Act
-    output = contract.hello(dummy_input)
+
+    reserve_address_str = "KBLZ2XFVWSPEZRZXDRTRT6DUUNPIF52I3SGQZZO2SJ2DKK5EJMC4DNCZPE"
+    reserve_address = AlgopyTestContext.any_account(self=context)
+
+    url_template = "template-ipfs://{ipfscid:0:dag-pb:reserve:sha2-256}"
+
+    metahash = str.encode(reserve_address_str)
+
+    # output = contract.apply_for_nft(
+    #     reserve_address=reserve_address,
+    #     url_template=url_template,
+    #     metadata_hash=metahash,
+    #     asset_name="Ayushman",
+    #     unit_name="ayush",
+    # )
 
     # Assert
-    assert output == f"Hello, {dummy_input}"
+    # assert output == f"Hello, {dummy_input}"

@@ -1,0 +1,16 @@
+#pragma version 10
+
+smart_contracts.mutable_smart_nft.contract.ARC20Contract.approval_program:
+    // smart_contracts/mutable_smart_nft/contract.py:17
+    // class ARC20Contract(ARC4Contract):
+    txn NumAppArgs
+    !
+    assert // reject transaction
+    txn OnCompletion
+    !
+    assert // reject transaction
+    txn ApplicationID
+    !
+    assert // is creating
+    int 1
+    return

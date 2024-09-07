@@ -1,0 +1,7 @@
+#pragma version 10
+
+smart_contracts.mutable_smart_nft.contract.ARC20Contract.clear_state_program:
+    // smart_contracts/mutable_smart_nft/contract.py:17
+    // class ARC20Contract(ARC4Contract):
+    int 1
+    return
