@@ -1,7 +1,0 @@
-#pragma version 10
-
-smart_contracts.mutable_smart_nft.contract.MutableSmartNft.clear_state_program:
-    // smart_contracts/mutable_smart_nft/contract.py:135
-    // class MutableSmartNft(ARC20Contract):
-    int 1
-    return

@@ -5,7 +5,9 @@ from algopy import (
     Bytes,
     Global,
     String,
+    Txn,
     UInt64,
+    gtxn,
     itxn,
     op,
     subroutine,
@@ -135,27 +137,38 @@ class ARC20Contract(ARC4Contract):
 class MutableSmartNft(ARC20Contract):
     counter: UInt64
     name: String
-    # criterias: DynamicArray[ARC4UInt64]
+    criterias: DynamicArray[ARC4UInt64]
 
     @abimethod(allow_actions=["NoOp"], create="require")
     def create_application(
-        self, name: String, counter: UInt64, criterias: DynamicArray[ARC4UInt64]
+        self,
+        name: String,
+        counter: UInt64,
+        criterias: DynamicArray[ARC4UInt64],
     ) -> None:
         self.counter = counter
         self.name = name
         self.criterias = criterias.copy()
 
     @abimethod()
-    def apply_for_nft(
+    def create_yojana_token(
         self,
         reserve_address: Account,
         url_template: String,
         asset_name: String,
         unit_name: String,
         metadata_hash: Bytes,
+        mbr_pay: gtxn.PaymentTransaction,
     ) -> None:
-        # assert Txn.sender != Global.creator_address
+        assert Txn.sender == mbr_pay.sender
+        assert mbr_pay.receiver == Global.current_application_address
         assert self.criterias.length != 0, "Length should not be zero"
+        assert self.are_criteria_matching(
+            criterias=self.criterias, applicant=Txn.sender
+        ), "One the criteria token balance is zero"
+
+        # apps_created = Global.current_application_address.total_assets_created + 1
+        # unit_name = unit_name + String.
         token = self.asset_create(
             total=UInt64(1),
             decimals=UInt32(0),
@@ -168,4 +181,31 @@ class MutableSmartNft(ARC20Contract):
             reserve_addr=reserve_address,
             freeze_addr=Global.current_application_address,
             clawback_addr=Global.current_application_address,
+        )
+
+        # self.opt_in_asset(token=token, applicant=applicant)
+
+    @subroutine
+    def are_criteria_matching(
+        self, criterias: DynamicArray[ARC4UInt64], applicant: Account
+    ) -> bool:
+        matches_all_criteria = True
+        for criteria in criterias:
+            [balance, flag] = op.AssetHoldingGet.asset_balance(
+                applicant, criteria.native
+            )
+            if balance == 0:
+                return False
+        return matches_all_criteria
+
+    @abimethod
+    def get_yojana_token(self, mbr_pay: gtxn.PaymentTransaction, token: UInt64) -> None:
+        assert mbr_pay.sender == Txn.sender
+        assert Txn.sender.is_opted_in(Asset(token))
+
+        self.asset_transfer(
+            xfer_asset=Asset(token),
+            asset_amount=UInt64(1),
+            asset_sender=Global.current_application_address,
+            asset_receiver=Txn.sender,
         )
